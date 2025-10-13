@@ -1,12 +1,16 @@
 package com.studentservice.service;
 
 import com.studentservice.dto.request.StudentRequestDTO;
+import com.studentservice.dto.response.PaginatedResponse;
 import com.studentservice.dto.response.StudentResponseDTO;
 import com.studentservice.entity.Student;
 import com.studentservice.exception.StudentNotFoundException;
 import com.studentservice.mapper.StudentMapper;
 import com.studentservice.repository.StudentRepository;
 import com.studentservice.service.impl.IStudentService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,11 +44,25 @@ public class StudentService implements IStudentService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<StudentResponseDTO> getAll() {
-        return repository.findAll()
+    public PaginatedResponse<StudentResponseDTO> getAllPaginated(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Student> studentPage = repository.findAll(pageable);
+
+        List<StudentResponseDTO> students = studentPage
+                .getContent()
                 .stream()
                 .map(studentMapper::toResponseDTO)
                 .toList();
+
+        return new PaginatedResponse<>(
+                students,
+                studentPage.getNumber(),
+                studentPage.getTotalPages(),
+                studentPage.getTotalElements(),
+                studentPage.getSize(),
+                studentPage.hasNext(),
+                studentPage.hasPrevious()
+        );
     }
 
     @Override
