@@ -119,11 +119,3 @@ El servicio se diseñará para ejecutarse en contenedor. Puntos a considerar:
   * Referenciar HU o issue en Jira.
   * Incluir descripción clara.
   * Ser revisadas antes de merge.
-
----
-
-## Contribuidores
-
-* Camilo Andrés Chavarro Guenis
-* Huber Andrés Parra Molina
-* Juan Fernando Pérez Olaya
