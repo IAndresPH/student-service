@@ -3,6 +3,7 @@ package com.studentservice.controller;
 import com.studentservice.dto.request.StudentRequestDTO;
 import com.studentservice.dto.response.PaginatedResponse;
 import com.studentservice.dto.response.StudentResponseDTO;
+import com.studentservice.enums.Career;
 import com.studentservice.service.impl.IStudentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ class StudentControllerTest {
                 id,
                 "STU-001",
                 3,
-                "Ingeniería",
+                Career.SOFTWARE_ENGINEERING,
                 LocalDate.of(2020, 1, 15),
                 bd("4.5")
         );
@@ -68,7 +69,7 @@ class StudentControllerTest {
             {
               "code":"STU-001",
               "semester":3,
-              "career":"Ingeniería",
+              "career":"SOFTWARE_ENGINEERING",
               "admissionDate":"2020-01-15",
               "average":4.5
             }
@@ -86,7 +87,7 @@ class StudentControllerTest {
     void update_ok() throws Exception {
         when(service.update(eq(4L), any(StudentRequestDTO.class))).thenReturn(
                 new StudentResponseDTO(
-                        4L, "STU-999",5,"Sistemas", LocalDate.of(2021,3,10), bd("4.7")
+                        4L, "STU-999",5,Career.COMPUTER_SCIENCE, LocalDate.of(2021,3,10), bd("4.7")
                 )
         );
 
@@ -94,7 +95,7 @@ class StudentControllerTest {
             {
               "code":"STU-999",
               "semester":5,
-              "career":"Sistemas",
+              "career":"COMPUTER_SCIENCE",
               "admissionDate":"2021-03-10",
               "average":4.7
             }

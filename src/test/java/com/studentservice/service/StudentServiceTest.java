@@ -4,6 +4,7 @@ import com.studentservice.dto.request.StudentRequestDTO;
 import com.studentservice.dto.response.PaginatedResponse;
 import com.studentservice.dto.response.StudentResponseDTO;
 import com.studentservice.entity.Student;
+import com.studentservice.enums.Career;
 import com.studentservice.exception.StudentNotFoundException;
 import com.studentservice.mapper.StudentMapper;
 import com.studentservice.repository.StudentRepository;
@@ -41,7 +42,7 @@ class StudentServiceTest {
     @BeforeEach
     void setup() {
         req = new StudentRequestDTO(
-                "STU-001",3,"Ingeniería",
+                "STU-001",3, Career.SOFTWARE_ENGINEERING,
                 LocalDate.of(2020,1,15), bd("4.5")
         );
 
@@ -49,12 +50,12 @@ class StudentServiceTest {
         entity.setId(1L);
         entity.setCode("STU-001");
         entity.setSemester(3);
-        entity.setCareer("Ingeniería");
+        entity.setCareer(Career.SOFTWARE_ENGINEERING);
         entity.setAdmissionDate(LocalDate.of(2020,1,15));
         entity.setAverage(bd("4.5"));
 
         resp = new StudentResponseDTO(
-                1L,"STU-001",3,"Ingeniería",
+                1L,"STU-001",3,Career.SOFTWARE_ENGINEERING,
                 LocalDate.of(2020,1,15), bd("4.5")
         );
     }
@@ -139,7 +140,7 @@ class StudentServiceTest {
         Student mapped = new Student();
         mapped.setCode("STU-999");
         mapped.setSemester(5);
-        mapped.setCareer("Sistemas");
+        mapped.setCareer(Career.COMPUTER_SCIENCE);
         mapped.setAdmissionDate(LocalDate.of(2021,3,10));
         mapped.setAverage(bd("4.7"));
 
@@ -147,12 +148,12 @@ class StudentServiceTest {
         saved.setId(1L);
         saved.setCode("STU-999");
         saved.setSemester(5);
-        saved.setCareer("Sistemas");
+        saved.setCareer(Career.COMPUTER_SCIENCE);
         saved.setAdmissionDate(LocalDate.of(2021,3,10));
         saved.setAverage(bd("4.7"));
 
         StudentResponseDTO updatedResp = new StudentResponseDTO(
-                1L,"STU-999",5,"Sistemas",
+                1L,"STU-999",5,Career.COMPUTER_SCIENCE,
                 LocalDate.of(2021,3,10), bd("4.7")
         );
 

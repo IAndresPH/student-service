@@ -1,5 +1,6 @@
 package com.studentservice.dto.request;
 
+import com.studentservice.enums.Career;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
@@ -17,7 +18,7 @@ public record StudentRequestDTO(
     Integer semester,
 
     @NotBlank @Size(max = 80)
-    String career,
+    Career career,
 
     @NotNull
     LocalDate admissionDate,
