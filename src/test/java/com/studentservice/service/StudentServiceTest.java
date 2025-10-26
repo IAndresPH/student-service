@@ -4,7 +4,6 @@ import com.studentservice.dto.request.StudentRequestDTO;
 import com.studentservice.dto.response.PaginatedResponse;
 import com.studentservice.dto.response.StudentResponseDTO;
 import com.studentservice.entity.Student;
-import com.studentservice.enums.Gender;
 import com.studentservice.exception.StudentNotFoundException;
 import com.studentservice.mapper.StudentMapper;
 import com.studentservice.repository.StudentRepository;
@@ -42,22 +41,12 @@ class StudentServiceTest {
     @BeforeEach
     void setup() {
         req = new StudentRequestDTO(
-                "Ada","Lovelace","ada.lovelace@example.com",
-                LocalDate.of(1990,12,10), Gender.FEMENINO,
-                "3001234567","Calle 123 #45-67",
                 "STU-001",3,"Ingeniería",
                 LocalDate.of(2020,1,15), bd("4.5")
         );
 
         entity = new Student();
         entity.setId(1L);
-        entity.setFirstName("Ada");
-        entity.setLastName("Lovelace");
-        entity.setEmail("ada.lovelace@example.com");
-        entity.setBirthDate(LocalDate.of(1990,12,10));
-        entity.setGender(Gender.FEMENINO);
-        entity.setPhone("3001234567");
-        entity.setAddress("Calle 123 #45-67");
         entity.setCode("STU-001");
         entity.setSemester(3);
         entity.setCareer("Ingeniería");
@@ -65,9 +54,7 @@ class StudentServiceTest {
         entity.setAverage(bd("4.5"));
 
         resp = new StudentResponseDTO(
-                1L,"Ada","Lovelace","ada.lovelace@example.com",
-                LocalDate.of(1990,12,10),34, Gender.FEMENINO,"3001234567",
-                "Calle 123 #45-67","STU-001",3,"Ingeniería",
+                1L,"STU-001",3,"Ingeniería",
                 LocalDate.of(2020,1,15), bd("4.5")
         );
     }
@@ -81,7 +68,6 @@ class StudentServiceTest {
         StudentResponseDTO out = service.create(req);
 
         assertNotNull(out);
-        assertEquals("Ada", out.firstName());
         verify(mapper).toEntity(req);
         verify(repository).save(entity);
         verify(mapper).toResponseDTO(entity);
@@ -151,10 +137,6 @@ class StudentServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(entity));
 
         Student mapped = new Student();
-        mapped.setFirstName("Grace");
-        mapped.setLastName("Hopper");
-        mapped.setEmail("grace.hopper@example.com");
-        mapped.setGender(Gender.FEMENINO);
         mapped.setCode("STU-999");
         mapped.setSemester(5);
         mapped.setCareer("Sistemas");
@@ -163,10 +145,6 @@ class StudentServiceTest {
 
         Student saved = new Student();
         saved.setId(1L);
-        saved.setFirstName("Grace");
-        saved.setLastName("Hopper");
-        saved.setEmail("grace.hopper@example.com");
-        saved.setGender(Gender.FEMENINO);
         saved.setCode("STU-999");
         saved.setSemester(5);
         saved.setCareer("Sistemas");
@@ -174,8 +152,7 @@ class StudentServiceTest {
         saved.setAverage(bd("4.7"));
 
         StudentResponseDTO updatedResp = new StudentResponseDTO(
-                1L,"Grace","Hopper","grace.hopper@example.com",
-                null,0, Gender.FEMENINO,null,null,"STU-999",5,"Sistemas",
+                1L,"STU-999",5,"Sistemas",
                 LocalDate.of(2021,3,10), bd("4.7")
         );
 
@@ -186,7 +163,6 @@ class StudentServiceTest {
         StudentResponseDTO out = service.update(1L, req);
 
         assertEquals(1L, out.id());
-        assertEquals("Grace", out.firstName());
 
         ArgumentCaptor<Student> cap = ArgumentCaptor.forClass(Student.class);
         verify(repository).findById(1L);

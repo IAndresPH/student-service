@@ -3,7 +3,6 @@ package com.studentservice.controller;
 import com.studentservice.dto.request.StudentRequestDTO;
 import com.studentservice.dto.response.PaginatedResponse;
 import com.studentservice.dto.response.StudentResponseDTO;
-import com.studentservice.enums.Gender;
 import com.studentservice.service.impl.IStudentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,14 +42,6 @@ class StudentControllerTest {
     private static StudentResponseDTO sample(Long id) {
         return new StudentResponseDTO(
                 id,
-                "Ada",
-                "Lovelace",
-                "ada.lovelace@example.com",
-                LocalDate.of(1990, 12, 10),
-                34,
-                Gender.FEMENINO,
-                "3001234567",
-                "Calle 123 #45-67",
                 "STU-001",
                 3,
                 "Ingeniería",
@@ -66,7 +57,6 @@ class StudentControllerTest {
         mvc.perform(get(BASE + "/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.firstName").value("Ada"))
                 .andExpect(jsonPath("$.code").value("STU-001"));
     }
 
@@ -76,13 +66,6 @@ class StudentControllerTest {
 
         String body = """
             {
-              "firstName":"Ada",
-              "lastName":"Lovelace",
-              "email":"ada.lovelace@example.com",
-              "birthDate":"1990-12-10",
-              "gender":"FEMENINO",
-              "phone":"3001234567",
-              "address":"Calle 123 #45-67",
               "code":"STU-001",
               "semester":3,
               "career":"Ingeniería",
@@ -96,7 +79,6 @@ class StudentControllerTest {
                         .content(body))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(2))
-                .andExpect(jsonPath("$.firstName").value("Ada"))
                 .andExpect(jsonPath("$.semester").value(3));
     }
 
@@ -104,21 +86,12 @@ class StudentControllerTest {
     void update_ok() throws Exception {
         when(service.update(eq(4L), any(StudentRequestDTO.class))).thenReturn(
                 new StudentResponseDTO(
-                        4L,"Grace","Hopper","grace.hopper@example.com",
-                        LocalDate.of(1985,12,9),39, Gender.FEMENINO,"3017654321","Av. 10-20",
-                        "STU-999",5,"Sistemas", LocalDate.of(2021,3,10), bd("4.7")
+                        4L, "STU-999",5,"Sistemas", LocalDate.of(2021,3,10), bd("4.7")
                 )
         );
 
         String body = """
             {
-              "firstName":"Grace",
-              "lastName":"Hopper",
-              "email":"grace.hopper@example.com",
-              "birthDate":"1985-12-09",
-              "gender":"FEMENINO",
-              "phone":"3017654321",
-              "address":"Av. 10-20",
               "code":"STU-999",
               "semester":5,
               "career":"Sistemas",
@@ -132,7 +105,6 @@ class StudentControllerTest {
                         .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(4))
-                .andExpect(jsonPath("$.firstName").value("Grace"))
                 .andExpect(jsonPath("$.code").value("STU-999"));
     }
 
