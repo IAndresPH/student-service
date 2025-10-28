@@ -5,6 +5,7 @@ import com.studentservice.dto.response.PaginatedResponse;
 import com.studentservice.dto.response.StudentResponseDTO;
 import com.studentservice.entity.Student;
 import com.studentservice.enums.Gender;
+import com.studentservice.enums.Career;
 import com.studentservice.exception.StudentNotFoundException;
 import com.studentservice.mapper.StudentMapper;
 import com.studentservice.repository.StudentRepository;
@@ -45,7 +46,7 @@ class StudentServiceTest {
                 "Ada","Lovelace","ada.lovelace@example.com",
                 LocalDate.of(1990,12,10), Gender.FEMENINO,
                 "3001234567","Calle 123 #45-67",
-                "STU-001",3,"Ingeniería",
+                "STU-001",3,Career.SOFTWARE_ENGINEERING,
                 LocalDate.of(2020,1,15), bd("4.5")
         );
 
@@ -60,14 +61,14 @@ class StudentServiceTest {
         entity.setAddress("Calle 123 #45-67");
         entity.setCode("STU-001");
         entity.setSemester(3);
-        entity.setCareer("Ingeniería");
+        entity.setCareer(Career.SOFTWARE_ENGINEERING);
         entity.setAdmissionDate(LocalDate.of(2020,1,15));
         entity.setAverage(bd("4.5"));
 
         resp = new StudentResponseDTO(
                 1L,"Ada","Lovelace","ada.lovelace@example.com",
                 LocalDate.of(1990,12,10),34, Gender.FEMENINO,"3001234567",
-                "Calle 123 #45-67","STU-001",3,"Ingeniería",
+                "Calle 123 #45-67","STU-001",3,Career.SOFTWARE_ENGINEERING,
                 LocalDate.of(2020,1,15), bd("4.5")
         );
     }
@@ -157,7 +158,7 @@ class StudentServiceTest {
         mapped.setGender(Gender.FEMENINO);
         mapped.setCode("STU-999");
         mapped.setSemester(5);
-        mapped.setCareer("Sistemas");
+        mapped.setCareer(Career.COMPUTER_SCIENCE);
         mapped.setAdmissionDate(LocalDate.of(2021,3,10));
         mapped.setAverage(bd("4.7"));
 
@@ -169,13 +170,13 @@ class StudentServiceTest {
         saved.setGender(Gender.FEMENINO);
         saved.setCode("STU-999");
         saved.setSemester(5);
-        saved.setCareer("Sistemas");
+        saved.setCareer(Career.COMPUTER_SCIENCE);
         saved.setAdmissionDate(LocalDate.of(2021,3,10));
         saved.setAverage(bd("4.7"));
 
         StudentResponseDTO updatedResp = new StudentResponseDTO(
                 1L,"Grace","Hopper","grace.hopper@example.com",
-                null,0, Gender.FEMENINO,null,null,"STU-999",5,"Sistemas",
+                null,0, Gender.FEMENINO,null,null,"STU-999",5,Career.COMPUTER_SCIENCE,
                 LocalDate.of(2021,3,10), bd("4.7")
         );
 
