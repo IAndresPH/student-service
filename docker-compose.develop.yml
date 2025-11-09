@@ -1,0 +1,7 @@
+services:
+  student-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: student-service:local
+    ports: ["8081:8081"]
