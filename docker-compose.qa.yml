@@ -1,0 +1,4 @@
+services:
+  student-service:
+    image: student-service:qa
+    ports: ["8081:8081"]
