@@ -5,6 +5,7 @@ import com.studentservice.dto.response.PaginatedResponse;
 import com.studentservice.dto.response.StudentResponseDTO;
 import com.studentservice.service.impl.IStudentService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import com.studentservice.service.StudentExcelImportService;
+
+import java.io.IOException;
+import java.util.List;
+
 import static com.studentservice.utils.ApiPaths.STUDENTS;
 
 @RestController
@@ -22,9 +29,11 @@ import static com.studentservice.utils.ApiPaths.STUDENTS;
 public class StudentController {
 
     private final IStudentService service;
+    private final StudentExcelImportService importService;
 
-    public StudentController(IStudentService service) {
+    public StudentController(IStudentService service, StudentExcelImportService importService) {
         this.service = service;
+        this.importService = importService;
     }
 
     @PostMapping
@@ -58,5 +67,11 @@ public class StudentController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<List<StudentResponseDTO>> importFromExcel(@RequestParam("file") MultipartFile file) throws IOException {
+        List<StudentResponseDTO> result = importService.importFromExcel(file);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 }
