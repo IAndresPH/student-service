@@ -16,10 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-import com.studentservice.service.StudentExcelImportService;
+import com.studentservice.service.impl.StudentImportService;
 
-import java.io.IOException;
 import java.util.List;
 
 import static com.studentservice.utils.ApiPaths.STUDENTS;
@@ -29,9 +27,9 @@ import static com.studentservice.utils.ApiPaths.STUDENTS;
 public class StudentController {
 
     private final IStudentService service;
-    private final StudentExcelImportService importService;
+    private final StudentImportService importService;
 
-    public StudentController(IStudentService service, StudentExcelImportService importService) {
+    public StudentController(IStudentService service, StudentImportService importService) {
         this.service = service;
         this.importService = importService;
     }
@@ -69,9 +67,9 @@ public class StudentController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<List<StudentResponseDTO>> importFromExcel(@RequestParam("file") MultipartFile file) throws IOException {
-        List<StudentResponseDTO> result = importService.importFromExcel(file);
+    @PostMapping(value = "/import", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<StudentResponseDTO>> importStudents(@RequestBody List<StudentRequestDTO> students) {
+        List<StudentResponseDTO> result = importService.importStudents(students);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 }
