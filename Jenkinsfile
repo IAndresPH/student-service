@@ -40,15 +40,18 @@ pipeline {
 
   stages {
 
-    stage('Checkout') {
-      steps {
-        checkout([
-          $class: 'GitSCM',
-          branches: [[name: "*/${BRANCH}"]],
-          userRemoteConfigs: [[url: 'https://github.com/TU_REPO/student-service.git']]
-        ])
-      }
-    }
+   stage('Checkout') {
+       steps {
+           checkout([
+               $class: 'GitSCM',
+               branches: [[name: "*/${BRANCH}"]],
+               userRemoteConfigs: [[
+                   url: 'https://github.com/IAndresPH/student-service.git',
+                   credentialsId: 'github-https'
+               ]]
+           ])
+       }
+   }
 
     stage('Generate .env.deploy') {
       steps {
