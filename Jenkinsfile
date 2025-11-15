@@ -13,13 +13,10 @@ pipeline {
     }
 
     environment {
-        MVN_CMD = "mvn -B -U"
         IMAGE_NAME = "student-service"
         IMAGE_TAG = "${IMAGE_TAG ?: BUILD_NUMBER}"
         FULL_IMAGE = "${DOCKER_REGISTRY_HOST ? DOCKER_REGISTRY_HOST + '/' : ''}${IMAGE_NAME}:${IMAGE_TAG}"
-
         ENV_DEPLOY_FILE = ".env.deploy"
-
         DOCKER_REGISTRY_CRED = "docker-registry-creds"
     }
 
@@ -52,9 +49,17 @@ pipeline {
         }
 
         stage('Maven Package') {
+            agent {
+                docker {
+                    image 'maven:3.9.3-eclipse-temurin-21'
+                    args '-v /var/run/docker.sock:/var/run/docker.sock -v $PWD:/workspace'
+                }
+            }
             steps {
-                sh "${MVN_CMD} clean package -DskipTests -DskipITs"
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                dir('/workspace') {
+                    sh "mvn -B -U clean package -DskipTests -DskipITs"
+                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                }
             }
         }
 
