@@ -45,17 +45,14 @@ pipeline {
             }
         }
 
-        stage('Copy .env from Server') {
-            steps {
-                sshagent([SSH_SERVER_CRED]) {
-                    sh """
-                        # Copiar el .env existente del servidor como .env.deploy
-                        scp deployer@${SERVER_HOST}:/apps/config/.env ${ENV_DEPLOY_FILE}
-                        echo ".env.deploy copiado desde servidor correctamente"
-                    """
-                }
-            }
-        }
+       stage('Copy .env from Server') {
+           steps {
+               sh """
+                   cp /apps/config/student/.env ${ENV_DEPLOY_FILE}
+                   echo ".env.deploy copiado desde volumen correctamente"
+               """
+           }
+       }
 
         stage('Maven Package') {
             steps {
