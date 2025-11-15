@@ -1,3 +1,0 @@
-services:
-  student-service:
-    image: student-service:main
