@@ -13,7 +13,7 @@ pipeline {
     }
 
     environment {
-        MVN_CMD = "/usr/bin/mvn" // ruta de Maven en VPS o agente Jenkins
+        MVN_CMD = "/usr/bin/mvn" // ruta de Maven en VPS
         IMAGE_NAME = "student-service"
         IMAGE_TAG = "${IMAGE_TAG ?: BUILD_NUMBER}"
         FULL_IMAGE = "${DOCKER_REGISTRY_HOST ? DOCKER_REGISTRY_HOST + '/' : ''}${IMAGE_NAME}:${IMAGE_TAG}"
@@ -27,7 +27,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 git branch: "${BRANCH}",
@@ -50,16 +49,16 @@ pipeline {
                 maven 'Maven3.9'
             }
             steps {
-                sh "${MVN_CMD} clean package -DskipTests -DskipITs"
+                sh "mvn clean package -DskipTests -DskipITs"
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
 
-        stage('Docker Build') {
-            steps {
-                sh "docker build -t ${FULL_IMAGE} ."
-            }
-        }
+       stage('Docker Build') {
+           steps {
+               sh "docker build -t ${FULL_IMAGE} ."
+           }
+       }
 
         stage('Docker Push') {
             when {
@@ -80,19 +79,18 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-            steps {
-                sh """
-                    mkdir -p ${DEPLOY_DIR}
-                    cp ${ENV_DEPLOY_FILE} ${DEPLOY_DIR}/.env
-                    cd ${DEPLOY_DIR}
-                    docker-compose down || true
-                    docker-compose pull
-                    docker-compose up -d
-                """
-            }
-        }
-    }
+       stage('Deploy') {
+           steps {
+               sh """
+                   mkdir -p ${DEPLOY_DIR}
+                   cp ${ENV_DEPLOY_FILE} ${DEPLOY_DIR}/.env
+                   cd ${DEPLOY_DIR}
+                   docker compose down
+                   docker compose pull
+                   docker compose up -d
+               """
+           }
+       }
 
     post {
         success {
