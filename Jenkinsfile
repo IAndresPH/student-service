@@ -20,6 +20,8 @@ pipeline {
         ENV_DEPLOY_FILE = ".env.deploy"
         DOCKER_REGISTRY_CRED = "docker-registry-creds"
         DEPLOY_DIR = "/apps/deploy"
+        CONTAINER_NAME = "student-service"
+        PORT = "8080"
     }
 
     options {
@@ -38,6 +40,7 @@ pipeline {
         stage('Copy .env') {
             steps {
                 sh """
+                    mkdir -p ${DEPLOY_DIR}
                     cp /apps/config/student/.env ${ENV_DEPLOY_FILE}
                     echo ".env.deploy copiado desde volumen correctamente"
                 """
@@ -82,12 +85,12 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh """
-                    mkdir -p ${DEPLOY_DIR}
                     cp ${ENV_DEPLOY_FILE} ${DEPLOY_DIR}/.env
-                    cd ${DEPLOY_DIR}
-                    docker-compose down
-                    docker-compose pull
-                    docker-compose up -d
+                    # Detener y eliminar el contenedor si ya existe
+                    docker stop ${CONTAINER_NAME} || true
+                    docker rm ${CONTAINER_NAME} || true
+                    # Ejecutar nuevo contenedor
+                    docker run -d --name ${CONTAINER_NAME} --env-file ${DEPLOY_DIR}/.env -p ${PORT}:${PORT} ${FULL_IMAGE}
                 """
             }
         }
