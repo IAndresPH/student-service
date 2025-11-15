@@ -45,8 +45,11 @@ pipeline {
         }
 
         stage('Maven Package') {
+            tools {
+                maven 'Maven3.9'
+            }
             steps {
-                sh "${MVN_CMD} clean package -DskipTests -DskipITs"
+                sh "mvn clean package -DskipTests -DskipITs"
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
