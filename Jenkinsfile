@@ -54,11 +54,11 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
-            steps {
-                sh "docker build -t ${FULL_IMAGE} ."
-            }
-        }
+       stage('Docker Build') {
+           steps {
+               sh "docker build -t ${FULL_IMAGE} ."
+           }
+       }
 
         stage('Docker Push') {
             when {
