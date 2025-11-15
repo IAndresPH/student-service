@@ -21,9 +21,6 @@ pipeline {
         ENV_DEPLOY_FILE = ".env.deploy"
 
         DOCKER_REGISTRY_CRED = "docker-registry-creds"
-        SSH_SERVER_CRED = "ssh-server"
-
-        SERVER_HOST = "localhost"
     }
 
     options {
@@ -45,14 +42,14 @@ pipeline {
             }
         }
 
-       stage('Copy .env from Server') {
-           steps {
-               sh """
-                   cp /apps/config/student/.env ${ENV_DEPLOY_FILE}
-                   echo ".env.deploy copiado desde volumen correctamente"
-               """
-           }
-       }
+        stage('Copy .env from Volume') {
+            steps {
+                sh """
+                    cp /apps/config/student/.env ${ENV_DEPLOY_FILE}
+                    echo ".env.deploy copiado desde volumen correctamente"
+                """
+            }
+        }
 
         stage('Maven Package') {
             steps {
@@ -89,12 +86,12 @@ pipeline {
 
         stage('Deploy to Server') {
             steps {
-                sshagent([SSH_SERVER_CRED]) {
-                    sh """
-                        scp ${ENV_DEPLOY_FILE} deployer@${SERVER_HOST}:/apps/config/.env.deploy
-                        ssh deployer@${SERVER_HOST} 'cd /apps/docker && docker compose down && docker compose pull && docker compose up -d'
-                    """
-                }
+                sh """
+                    cd /apps/deploy
+                    docker compose down
+                    docker compose pull
+                    docker compose up -d
+                """
             }
         }
 
