@@ -40,7 +40,7 @@ pipeline {
             steps {
                 sh """
                     mkdir -p ${DEPLOY_DIR}
-                    cp /apps/config/student/.env ${ENV_DEPLOY_FILE}
+                    cp /apps/config/student/.env ${DEPLOY_DIR}/${ENV_DEPLOY_FILE}
                     echo ".env.deploy copiado desde volumen correctamente"
                 """
             }
@@ -84,14 +84,13 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    // Leer el puerto desde el .env
+                    // Leer el puerto desde el .env ya copiado en deploy
                     def port = sh(script: "grep '^PORT=' ${DEPLOY_DIR}/${ENV_DEPLOY_FILE} | cut -d '=' -f2", returnStdout: true).trim()
 
                     sh """
-                        cp ${ENV_DEPLOY_FILE} ${DEPLOY_DIR}/.env
                         docker stop ${CONTAINER_NAME} || true
                         docker rm ${CONTAINER_NAME} || true
-                        docker run -d --name ${CONTAINER_NAME} --env-file ${DEPLOY_DIR}/.env -p ${port}:${port} ${FULL_IMAGE}
+                        docker run -d --name ${CONTAINER_NAME} --env-file ${DEPLOY_DIR}/${ENV_DEPLOY_FILE} -p ${port}:${port} ${FULL_IMAGE}
                     """
                 }
             }
