@@ -1,4 +1,0 @@
-services:
-  student-service:
-    image: student-service:release
-    ports: ["8081:8081"]
