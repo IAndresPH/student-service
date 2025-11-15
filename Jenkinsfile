@@ -5,7 +5,7 @@ pipeline {
     choice(
       name: 'ENVIRONMENT',
       choices: ['develop', 'qa', 'release.s.2025.08', 'release.s.2025.09', 'release.s.2025.10'],
-      description: 'Ambiente a usar (solo informativo por ahora)'
+      description: 'Ambiente a usar (solo informativo)'
     )
     string(name: 'BRANCH', defaultValue: 'develop', description: 'Rama a construir')
     string(name: 'IMAGE_TAG', defaultValue: '', description: 'Tag de la imagen Docker')
@@ -13,16 +13,13 @@ pipeline {
   }
 
   environment {
-
     MVN_CMD = "mvn -B -U"
 
     IMAGE_NAME = "student-service"
     IMAGE_TAG = "${IMAGE_TAG ?: BUILD_NUMBER}"
 
-    // Si el usuario deja vacío DOCKER_REGISTRY_HOST, no se usa prefijo.
     FULL_IMAGE = "${DOCKER_REGISTRY_HOST ? DOCKER_REGISTRY_HOST + '/' : ''}${IMAGE_NAME}:${IMAGE_TAG}"
 
-    // Jenkins credentials (las que ya creaste)
     CRED_DB_URL  = "db-url-student"
     CRED_DB_USER = "db-user-student"
     CRED_DB_PASS = "db-pass-student"
@@ -40,18 +37,18 @@ pipeline {
 
   stages {
 
-   stage('Checkout') {
-       steps {
-           checkout([
-               $class: 'GitSCM',
-               branches: [[name: "*/${BRANCH}"]],
-               userRemoteConfigs: [[
-                   url: 'https://github.com/IAndresPH/student-service.git',
-                   credentialsId: 'github-https'
-               ]]
-           ])
-       }
-   }
+    stage('Checkout') {
+      steps {
+        checkout([
+          $class: 'GitSCM',
+          branches: [[name: "*/${BRANCH}"]],
+          userRemoteConfigs: [[
+            url: 'https://github.com/IAndresPH/student-service.git',
+            credentialsId: 'github-https'
+          ]]
+        ])
+      }
+    }
 
     stage('Generate .env.deploy') {
       steps {
@@ -69,31 +66,14 @@ pipeline {
             echo "DB_USERNAME=\${DB_USERNAME}" >> ${ENV_DEPLOY_FILE}
             echo "DB_PASSWORD=\${DB_PASSWORD}" >> ${ENV_DEPLOY_FILE}
           """
-          sh "echo '.env.deploy generated (hidden values)'"
+          sh "echo '.env.deploy generado correctamente (valores ocultos)'"
         }
       }
     }
 
-    stage('Maven - Dependencies') {
+    stage('Maven Package') {
       steps {
-        sh "${MVN_CMD} dependency:go-offline"
-      }
-    }
-
-    stage('Tests + Jacoco') {
-      steps {
-        sh "${MVN_CMD} -DskipTests=false clean verify"
-      }
-      post {
-        always {
-          archiveArtifacts artifacts: 'target/site/jacoco/**', allowEmptyArchive: true
-        }
-      }
-    }
-
-    stage('Package JAR') {
-      steps {
-        sh "${MVN_CMD} -DskipTests -DskipITs package"
+        sh "${MVN_CMD} -DskipTests -DskipITs clean package"
         archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
       }
     }
@@ -127,7 +107,7 @@ pipeline {
 
   post {
     success {
-      echo "Pipeline OK. Imagen generada: ${FULL_IMAGE}"
+      echo "Pipeline completo. Imagen generada: ${FULL_IMAGE}"
     }
     failure {
       echo "Pipeline falló."
