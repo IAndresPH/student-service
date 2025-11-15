@@ -80,19 +80,18 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-            steps {
-                sh """
-                    mkdir -p ${DEPLOY_DIR}
-                    cp ${ENV_DEPLOY_FILE} ${DEPLOY_DIR}/.env
-                    cd ${DEPLOY_DIR}
-                    docker compose down
-                    docker compose pull
-                    docker compose up -d
-                """
-            }
-        }
-    }
+       stage('Deploy') {
+           steps {
+               sh """
+                   mkdir -p ${DEPLOY_DIR}
+                   cp ${ENV_DEPLOY_FILE} ${DEPLOY_DIR}/.env
+                   cd ${DEPLOY_DIR}
+                   docker-compose down
+                   docker-compose pull
+                   docker-compose up -d
+               """
+           }
+       }
 
     post {
         success {
