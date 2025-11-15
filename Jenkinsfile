@@ -13,15 +13,14 @@ pipeline {
     }
 
     environment {
-        MVN_CMD = "/usr/bin/mvn" // ruta de Maven en VPS
+        MVN_CMD = "/usr/bin/mvn"
         IMAGE_NAME = "student-service"
-        IMAGE_TAG = "${IMAGE_TAG ?: BUILD_NUMBER}"
+        IMAGE_TAG = "${ENVIRONMENT}-${BUILD_NUMBER}"
         FULL_IMAGE = "${DOCKER_REGISTRY_HOST ? DOCKER_REGISTRY_HOST + '/' : ''}${IMAGE_NAME}:${IMAGE_TAG}"
         ENV_DEPLOY_FILE = ".env.deploy"
         DOCKER_REGISTRY_CRED = "docker-registry-creds"
         DEPLOY_DIR = "/apps/deploy"
         CONTAINER_NAME = "student-service"
-        PORT = "8080"
     }
 
     options {
@@ -84,14 +83,17 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sh """
-                    cp ${ENV_DEPLOY_FILE} ${DEPLOY_DIR}/.env
-                    # Detener y eliminar el contenedor si ya existe
-                    docker stop ${CONTAINER_NAME} || true
-                    docker rm ${CONTAINER_NAME} || true
-                    # Ejecutar nuevo contenedor
-                    docker run -d --name ${CONTAINER_NAME} --env-file ${DEPLOY_DIR}/.env -p ${PORT}:${PORT} ${FULL_IMAGE}
-                """
+                script {
+                    // Leer el puerto desde el .env
+                    def port = sh(script: "grep '^PORT=' ${DEPLOY_DIR}/${ENV_DEPLOY_FILE} | cut -d '=' -f2", returnStdout: true).trim()
+
+                    sh """
+                        cp ${ENV_DEPLOY_FILE} ${DEPLOY_DIR}/.env
+                        docker stop ${CONTAINER_NAME} || true
+                        docker rm ${CONTAINER_NAME} || true
+                        docker run -d --name ${CONTAINER_NAME} --env-file ${DEPLOY_DIR}/.env -p ${port}:${port} ${FULL_IMAGE}
+                    """
+                }
             }
         }
     }
