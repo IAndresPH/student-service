@@ -13,11 +13,13 @@ pipeline {
     }
 
     environment {
+        MVN_CMD = "/usr/bin/mvn" // ruta de Maven en VPS
         IMAGE_NAME = "student-service"
         IMAGE_TAG = "${IMAGE_TAG ?: BUILD_NUMBER}"
         FULL_IMAGE = "${DOCKER_REGISTRY_HOST ? DOCKER_REGISTRY_HOST + '/' : ''}${IMAGE_NAME}:${IMAGE_TAG}"
         ENV_DEPLOY_FILE = ".env.deploy"
         DOCKER_REGISTRY_CRED = "docker-registry-creds"
+        DEPLOY_DIR = "/apps/deploy"
     }
 
     options {
@@ -25,21 +27,15 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: "*/${BRANCH}"]],
-                    userRemoteConfigs: [[
-                        url: 'https://github.com/IAndresPH/student-service.git',
-                        credentialsId: 'github-https'
-                    ]]
-                ])
+                git branch: "${BRANCH}",
+                    url: 'https://github.com/IAndresPH/student-service.git',
+                    credentialsId: 'github-https'
             }
         }
 
-        stage('Copy .env from Volume') {
+        stage('Copy .env') {
             steps {
                 sh """
                     cp /apps/config/student/.env ${ENV_DEPLOY_FILE}
@@ -49,23 +45,15 @@ pipeline {
         }
 
         stage('Maven Package') {
-            agent {
-                docker {
-                    image 'maven:3.9.3-eclipse-temurin-21'
-                    args '-v /var/run/docker.sock:/var/run/docker.sock -v $PWD:/workspace'
-                }
-            }
             steps {
-                dir('/workspace') {
-                    sh "mvn -B -U clean package -DskipTests -DskipITs"
-                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-                }
+                sh "${MVN_CMD} clean package -DskipTests -DskipITs"
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
 
         stage('Docker Build') {
             steps {
-                sh "docker build --pull -t ${FULL_IMAGE} ."
+                sh "docker build -t ${FULL_IMAGE} ."
             }
         }
 
@@ -80,7 +68,6 @@ pipeline {
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
                     sh """
-                        set -e
                         echo \$DOCKER_PASS | docker login ${DOCKER_REGISTRY_HOST} --username \$DOCKER_USER --password-stdin
                         docker push ${FULL_IMAGE}
                         docker logout ${DOCKER_REGISTRY_HOST}
@@ -89,17 +76,17 @@ pipeline {
             }
         }
 
-        stage('Deploy to Server') {
+        stage('Deploy') {
             steps {
                 sh """
-                    cd /apps/deploy
+                    cp ${ENV_DEPLOY_FILE} ${DEPLOY_DIR}/.env
+                    cd ${DEPLOY_DIR}
                     docker compose down
                     docker compose pull
                     docker compose up -d
                 """
             }
         }
-
     }
 
     post {
