@@ -2,53 +2,37 @@ pipeline {
     agent any
 
     parameters {
-        choice(
-            name: 'ENVIRONMENT',
-            choices: ['develop', 'qa', 'release.s.2025.08', 'release.s.2025.09', 'release.s.2025.10'],
-            description: 'Ambiente a usar (solo informativo)'
-        )
         string(name: 'BRANCH', defaultValue: 'develop', description: 'Rama a construir')
         string(name: 'IMAGE_TAG', defaultValue: '', description: 'Tag de la imagen Docker')
         string(name: 'DOCKER_REGISTRY_HOST', defaultValue: '', description: 'Registry para push (vacío = no push)')
     }
 
     environment {
-        MVN_CMD = "/usr/bin/mvn" // ruta de Maven en VPS
         IMAGE_NAME = "student-service"
         IMAGE_TAG = "${IMAGE_TAG ?: BUILD_NUMBER}"
         FULL_IMAGE = "${DOCKER_REGISTRY_HOST ? DOCKER_REGISTRY_HOST + '/' : ''}${IMAGE_NAME}:${IMAGE_TAG}"
+        DEPLOY_DIR = "/apps/deploy"
         ENV_DEPLOY_FILE = ".env.deploy"
         DOCKER_REGISTRY_CRED = "docker-registry-creds"
-        DEPLOY_DIR = "/apps/deploy"
     }
 
-    options {
-        timestamps()
-    }
+    options { timestamps() }
 
     stages {
 
         stage('Checkout') {
             steps {
-                git branch: "${BRANCH}",
-                    url: 'https://github.com/IAndresPH/student-service.git',
-                    credentialsId: 'github-https'
+                git branch: "${BRANCH}", url: 'https://github.com/IAndresPH/student-service.git', credentialsId: 'github-https'
             }
         }
 
         stage('Copy .env') {
             steps {
-                sh """
-                    cp /apps/config/student/.env ${ENV_DEPLOY_FILE}
-                    echo ".env.deploy copiado desde volumen correctamente"
-                """
+                sh "cp /apps/config/student/.env ${ENV_DEPLOY_FILE}"
             }
         }
 
-        stage('Maven Package') {
-            tools {
-                maven 'Maven3.9'
-            }
+        stage('Build Maven') {
             steps {
                 sh "mvn clean package -DskipTests -DskipITs"
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
@@ -62,15 +46,9 @@ pipeline {
         }
 
         stage('Docker Push') {
-            when {
-                expression { return DOCKER_REGISTRY_HOST?.trim() }
-            }
+            when { expression { return DOCKER_REGISTRY_HOST?.trim() } }
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: DOCKER_REGISTRY_CRED,
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
+                withCredentials([usernamePassword(credentialsId: DOCKER_REGISTRY_CRED, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh """
                         echo \$DOCKER_PASS | docker login ${DOCKER_REGISTRY_HOST} --username \$DOCKER_USER --password-stdin
                         docker push ${FULL_IMAGE}
@@ -80,28 +58,24 @@ pipeline {
             }
         }
 
-       stage('Deploy') {
-           steps {
-               sh """
-                   mkdir -p ${DEPLOY_DIR}
-                   cp ${ENV_DEPLOY_FILE} ${DEPLOY_DIR}/.env
-                   cd ${DEPLOY_DIR}
-                   docker-compose down
-                   docker-compose pull
-                   docker-compose up -d
-               """
-           }
-       }
+        stage('Deploy') {
+            steps {
+                sh """
+                    mkdir -p ${DEPLOY_DIR}
+                    cp ${ENV_DEPLOY_FILE} ${DEPLOY_DIR}/.env
+                    cd ${DEPLOY_DIR}
+                    docker-compose down
+                    docker-compose pull
+                    docker-compose up -d
+                """
+            }
+        }
+
+    }
 
     post {
-        success {
-            echo "Pipeline completo. Imagen generada: ${FULL_IMAGE}"
-        }
-        failure {
-            echo "Pipeline falló."
-        }
-        always {
-            cleanWs()
-        }
+        success { echo "Pipeline completo. Imagen generada: ${FULL_IMAGE}" }
+        failure { echo "Pipeline falló." }
+        always { cleanWs() }
     }
 }
