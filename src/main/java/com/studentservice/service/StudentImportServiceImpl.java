@@ -4,12 +4,17 @@ import com.studentservice.dto.request.StudentRequestDTO;
 import com.studentservice.dto.response.StudentResponseDTO;
 import com.studentservice.service.impl.IStudentService;
 import com.studentservice.service.impl.StudentImportService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class StudentImportServiceImpl implements StudentImportService {
+
+    private static final Logger log = LoggerFactory.getLogger(StudentImportServiceImpl.class);
 
     private final IStudentService studentService;
 
@@ -26,7 +31,8 @@ public class StudentImportServiceImpl implements StudentImportService {
                 StudentResponseDTO createdDto = studentService.create(dto);
                 created.add(createdDto);
             } catch (Exception e) {
-                System.err.println("Error creando estudiante: " + " → " + e.getMessage());
+                log.error("Error creando estudiante durante importación. Payload: {}. Causa: {}",
+                        dto, e.getMessage(), e);
             }
         }
 
