@@ -6,6 +6,7 @@ import com.studentservice.dto.response.StudentResponseDTO;
 import com.studentservice.enums.Gender;
 import com.studentservice.enums.Career;
 import com.studentservice.service.impl.IStudentService;
+import com.studentservice.service.impl.StudentImportService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -38,6 +39,9 @@ class StudentControllerTest {
 
     @MockitoBean
     private IStudentService service;
+
+    @MockitoBean
+    private StudentImportService studentImportService;
 
     private static BigDecimal bd(String v) { return new BigDecimal(v); }
 
@@ -158,5 +162,55 @@ class StudentControllerTest {
                 .andExpect(jsonPath("$.totalElements").value(1))
                 .andExpect(jsonPath("$.currentPage").value(0))
                 .andExpect(jsonPath("$.pageSize").value(10));
+    }
+
+    @Test
+    void importStudents_ok() throws Exception {
+        List<StudentResponseDTO> imported = List.of(
+                sample(1L),
+                sample(2L)
+        );
+        when(studentImportService.importStudents(any(List.class))).thenReturn(imported);
+
+        String body = """
+            [
+              {
+                "firstName":"Ada",
+                "lastName":"Lovelace",
+                "email":"ada.lovelace@example.com",
+                "birthDate":"1990-12-10",
+                "gender":"FEMENINO",
+                "phone":"3001234567",
+                "address":"Calle 123 #45-67",
+                "code":"STU-001",
+                "semester":3,
+                "career":"SOFTWARE_ENGINEERING",
+                "admissionDate":"2020-01-15",
+                "average":4.5
+              },
+              {
+                "firstName":"Ada",
+                "lastName":"Lovelace",
+                "email":"ada.lovelace@example.com",
+                "birthDate":"1990-12-10",
+                "gender":"FEMENINO",
+                "phone":"3001234567",
+                "address":"Calle 123 #45-67",
+                "code":"STU-002",
+                "semester":3,
+                "career":"SOFTWARE_ENGINEERING",
+                "admissionDate":"2020-01-15",
+                "average":4.5
+              }
+            ]
+            """;
+
+        mvc.perform(post(BASE + "/import")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].firstName").value("Ada"))
+                .andExpect(jsonPath("$[1].id").value(2));
     }
 }
