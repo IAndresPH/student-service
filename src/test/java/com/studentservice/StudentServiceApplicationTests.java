@@ -1,6 +1,5 @@
 package com.studentservice;
 
-import com.studentservice.config.CorsConfig;
 import com.studentservice.controller.StudentController;
 import com.studentservice.exception.handler.GlobalExceptionHandler;
 import com.studentservice.mapper.StudentMapper;
@@ -53,8 +52,7 @@ class StudentServiceApplicationTests {
                 StudentService.class,
                 StudentMapper.class,
                 StudentRepository.class,
-                GlobalExceptionHandler.class,
-                CorsConfig.class
+                GlobalExceptionHandler.class
         );
 
     }
