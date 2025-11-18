@@ -1,6 +1,7 @@
 package com.studentservice.entity;
 
 import com.studentservice.enums.Gender;
+import com.studentservice.enums.Career;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -24,7 +25,7 @@ class StudentEntityTest {
         s.setAddress("Calle 123 #45-67");
         s.setCode("STU-001");
         s.setSemester(3);
-        s.setCareer("Ingeniería");
+        s.setCareer(Career.SOFTWARE_ENGINEERING);
         s.setAdmissionDate(LocalDate.of(2020,1,15));
         s.setAverage(new BigDecimal("4.5"));
 
@@ -38,7 +39,7 @@ class StudentEntityTest {
         assertEquals("Calle 123 #45-67", s.getAddress());
         assertEquals("STU-001", s.getCode());
         assertEquals(3, s.getSemester());
-        assertEquals("Ingeniería", s.getCareer());
+        assertEquals(Career.SOFTWARE_ENGINEERING, s.getCareer());
         assertEquals(LocalDate.of(2020,1,15), s.getAdmissionDate());
         assertEquals(new BigDecimal("4.5"), s.getAverage());
     }

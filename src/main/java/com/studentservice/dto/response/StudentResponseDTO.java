@@ -1,6 +1,7 @@
 package com.studentservice.dto.response;
 
 import com.studentservice.enums.Gender;
+import com.studentservice.enums.Career;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -16,7 +17,7 @@ public record StudentResponseDTO(
     String address,
     String code,
     Integer semester,
-    String career,
+    Career career,
     LocalDate admissionDate,
     BigDecimal average
 ) {}

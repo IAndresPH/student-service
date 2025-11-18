@@ -4,7 +4,9 @@ import com.studentservice.dto.request.StudentRequestDTO;
 import com.studentservice.dto.response.PaginatedResponse;
 import com.studentservice.dto.response.StudentResponseDTO;
 import com.studentservice.enums.Gender;
+import com.studentservice.enums.Career;
 import com.studentservice.service.impl.IStudentService;
+import com.studentservice.service.impl.StudentImportService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -38,6 +40,9 @@ class StudentControllerTest {
     @MockitoBean
     private IStudentService service;
 
+    @MockitoBean
+    private StudentImportService studentImportService;
+
     private static BigDecimal bd(String v) { return new BigDecimal(v); }
 
     private static StudentResponseDTO sample(Long id) {
@@ -53,7 +58,7 @@ class StudentControllerTest {
                 "Calle 123 #45-67",
                 "STU-001",
                 3,
-                "Ingeniería",
+                Career.SOFTWARE_ENGINEERING,
                 LocalDate.of(2020, 1, 15),
                 bd("4.5")
         );
@@ -85,7 +90,7 @@ class StudentControllerTest {
               "address":"Calle 123 #45-67",
               "code":"STU-001",
               "semester":3,
-              "career":"Ingeniería",
+              "career":"SOFTWARE_ENGINEERING",
               "admissionDate":"2020-01-15",
               "average":4.5
             }
@@ -106,7 +111,7 @@ class StudentControllerTest {
                 new StudentResponseDTO(
                         4L,"Grace","Hopper","grace.hopper@example.com",
                         LocalDate.of(1985,12,9),39, Gender.FEMENINO,"3017654321","Av. 10-20",
-                        "STU-999",5,"Sistemas", LocalDate.of(2021,3,10), bd("4.7")
+                        "STU-999",5,Career.COMPUTER_SCIENCE, LocalDate.of(2021,3,10), bd("4.7")
                 )
         );
 
@@ -121,7 +126,7 @@ class StudentControllerTest {
               "address":"Av. 10-20",
               "code":"STU-999",
               "semester":5,
-              "career":"Sistemas",
+              "career":"COMPUTER_SCIENCE",
               "admissionDate":"2021-03-10",
               "average":4.7
             }
@@ -157,5 +162,55 @@ class StudentControllerTest {
                 .andExpect(jsonPath("$.totalElements").value(1))
                 .andExpect(jsonPath("$.currentPage").value(0))
                 .andExpect(jsonPath("$.pageSize").value(10));
+    }
+
+    @Test
+    void importStudents_ok() throws Exception {
+        List<StudentResponseDTO> imported = List.of(
+                sample(1L),
+                sample(2L)
+        );
+        when(studentImportService.importStudents(any(List.class))).thenReturn(imported);
+
+        String body = """
+            [
+              {
+                "firstName":"Ada",
+                "lastName":"Lovelace",
+                "email":"ada.lovelace@example.com",
+                "birthDate":"1990-12-10",
+                "gender":"FEMENINO",
+                "phone":"3001234567",
+                "address":"Calle 123 #45-67",
+                "code":"STU-001",
+                "semester":3,
+                "career":"SOFTWARE_ENGINEERING",
+                "admissionDate":"2020-01-15",
+                "average":4.5
+              },
+              {
+                "firstName":"Ada",
+                "lastName":"Lovelace",
+                "email":"ada.lovelace@example.com",
+                "birthDate":"1990-12-10",
+                "gender":"FEMENINO",
+                "phone":"3001234567",
+                "address":"Calle 123 #45-67",
+                "code":"STU-002",
+                "semester":3,
+                "career":"SOFTWARE_ENGINEERING",
+                "admissionDate":"2020-01-15",
+                "average":4.5
+              }
+            ]
+            """;
+
+        mvc.perform(post(BASE + "/import")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].firstName").value("Ada"))
+                .andExpect(jsonPath("$[1].id").value(2));
     }
 }
