@@ -5,6 +5,7 @@ import com.studentservice.dto.response.PaginatedResponse;
 import com.studentservice.dto.response.StudentResponseDTO;
 import com.studentservice.service.impl.IStudentService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.studentservice.service.impl.StudentImportService;
+
+import java.util.List;
+
 import static com.studentservice.utils.ApiPaths.STUDENTS;
 
 @RestController
@@ -22,9 +27,11 @@ import static com.studentservice.utils.ApiPaths.STUDENTS;
 public class StudentController {
 
     private final IStudentService service;
+    private final StudentImportService importService;
 
-    public StudentController(IStudentService service) {
+    public StudentController(IStudentService service, StudentImportService importService) {
         this.service = service;
+        this.importService = importService;
     }
 
     @PostMapping
@@ -58,5 +65,11 @@ public class StudentController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(value = "/import", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<StudentResponseDTO>> importStudents(@RequestBody List<StudentRequestDTO> students) {
+        List<StudentResponseDTO> result = importService.importStudents(students);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 }

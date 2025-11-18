@@ -1,5 +1,6 @@
 package com.studentservice.entity;
 
+import com.studentservice.enums.Career;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -17,7 +18,7 @@ public class Student extends Person{
     private Integer semester;
 
     @Column(nullable = false, length = 80)
-    private String career;
+    private Career career;
 
     @Column(name = "admission_date", nullable = false)
     private LocalDate admissionDate;
@@ -41,11 +42,11 @@ public class Student extends Person{
         this.semester = semester;
     }
 
-    public String getCareer() {
+    public Career getCareer() {
         return career;
     }
 
-    public void setCareer(String career) {
+    public void setCareer(Career career) {
         this.career = career;
     }
 
